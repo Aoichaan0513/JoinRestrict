@@ -1,0 +1,19 @@
+isEnabled:
+  # jr open / close 時のやつ (サーバー開放ならtrue)
+  main: false
+  # jr allow / deny 時のやつ (連戦可能ならtrue)
+  block: false
+
+maxPlayers:
+  # スポンサー・リスナーでの合計 (-1でサーバー上限まで)
+  all: -1
+  # スポンサーでの上限 (-1で無効)
+  sponsor: -1
+  # リスナーでの上限 (-1で無効)
+  listener: -1
+
+list:
+  # スルーリスト (addで追加されたプレイヤーがここに入る)
+  through: []
+  # 連戦リスト (saveで保存されたプレイヤーがここに入る)
+  block: []

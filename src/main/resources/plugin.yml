@@ -1,0 +1,8 @@
+name: JoinRestrict
+version: @version@
+main: org.aoichaan0513.joinrestrict.Main
+description: JoinRestrict Plugin.
+author: Aoichaan0513
+
+commands:
+  jr:
