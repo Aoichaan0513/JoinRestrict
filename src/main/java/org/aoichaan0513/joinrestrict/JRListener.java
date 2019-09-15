@@ -2,16 +2,16 @@ package org.aoichaan0513.joinrestrict;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -42,100 +42,94 @@ public class JRListener implements Listener {
 
         if (config.getBoolean(Main.ConfigType.ISENABLED_MAIN.getName())) {
             if (count < maxCount) {
-                if (Main.list.contains(p.getUniqueId())) {
-                    /**
-                     * スポンサー時の処理
-                     */
-
-                    if (config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1) {
-                        if (sponsorCount < config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName())) {
-                            if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName())) {
-                                e.allow();
-
-                                if (!Main.sponsorList.contains(p.getUniqueId()) && !Main.isAdmin(p))
-                                    Main.sponsorList.add(p.getUniqueId());
-                            } else {
-                                if (!blockList.contains(p.getUniqueId().toString())) {
+                if (config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) == -1 && config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) == -1) {
+                    if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName())) {
+                        e.allow();
+                    } else {
+                        if (!blockList.contains(p.getUniqueId().toString())) {
+                            e.allow();
+                        } else {
+                            e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
+                        }
+                    }
+                } else {
+                    if (Main.list.contains(p.getUniqueId())) {
+                        /**
+                         * スポンサー時の処理
+                         */
+                        if (config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1) {
+                            if (sponsorCount < config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName())) {
+                                if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName())) {
                                     e.allow();
 
                                     if (!Main.sponsorList.contains(p.getUniqueId()) && !Main.isAdmin(p))
                                         Main.sponsorList.add(p.getUniqueId());
                                 } else {
-                                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_BLOCKED.getMessage());
+                                    if (!blockList.contains(p.getUniqueId().toString())) {
+                                        e.allow();
+
+                                        if (!Main.sponsorList.contains(p.getUniqueId()) && !Main.isAdmin(p))
+                                            Main.sponsorList.add(p.getUniqueId());
+                                    } else {
+                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
+                                    }
+                                }
+                            } else {
+                                if (Main.isAdmin(p)) {
+                                    e.allow();
+                                } else {
+                                    if (throughList.contains(p.getUniqueId().toString())) {
+                                        e.allow();
+                                    } else {
+                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_FULLED_SPONSOR.getMessage());
+                                    }
                                 }
                             }
                         } else {
                             if (Main.isAdmin(p)) {
                                 e.allow();
                             } else {
-                                if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName()) ||
-                                        (!config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName()) && !blockList.contains(p.getUniqueId().toString()))) {
-                                    if (throughList.contains(p.getUniqueId().toString())) {
-                                        e.allow();
-
-                                        if (!Main.sponsorList.contains(p.getUniqueId()) && !Main.isAdmin(p))
-                                            Main.sponsorList.add(p.getUniqueId());
-                                    } else {
-                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_FULLED.getMessage());
-                                    }
-                                } else {
-                                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_BLOCKED.getMessage());
-                                }
+                                e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_SPONSOR.getMessage());
                             }
                         }
                     } else {
-                        if (Main.isAdmin(p)) {
-                            e.allow();
-                        } else {
-                            e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_OTHER.getMessage());
-                        }
-                    }
-                } else {
-                    /**
-                     * 通常時の処理
-                     */
-
-                    if (config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1) {
-                        if (listenerCount < config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName())) {
-                            if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName())) {
-                                e.allow();
-
-                                if (!Main.listenerList.contains(p.getUniqueId()) && !Main.isAdmin(p))
-                                    Main.listenerList.add(p.getUniqueId());
-                            } else {
-                                if (!blockList.contains(p.getUniqueId().toString())) {
+                        /**
+                         * 通常時の処理
+                         */
+                        if (config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1) {
+                            if (listenerCount < config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName())) {
+                                if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName())) {
                                     e.allow();
 
                                     if (!Main.listenerList.contains(p.getUniqueId()) && !Main.isAdmin(p))
                                         Main.listenerList.add(p.getUniqueId());
                                 } else {
-                                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_BLOCKED.getMessage());
+                                    if (!blockList.contains(p.getUniqueId().toString())) {
+                                        e.allow();
+
+                                        if (!Main.listenerList.contains(p.getUniqueId()) && !Main.isAdmin(p))
+                                            Main.listenerList.add(p.getUniqueId());
+                                    } else {
+                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
+                                    }
+                                }
+                            } else {
+                                if (Main.isAdmin(p)) {
+                                    e.allow();
+                                } else {
+                                    if (throughList.contains(p.getUniqueId().toString())) {
+                                        e.allow();
+                                    } else {
+                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_FULLED_LISTENER.getMessage());
+                                    }
                                 }
                             }
                         } else {
                             if (Main.isAdmin(p)) {
                                 e.allow();
                             } else {
-                                if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName()) ||
-                                        (!config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName()) && !blockList.contains(p.getUniqueId().toString()))) {
-                                    if (throughList.contains(p.getUniqueId().toString())) {
-                                        e.allow();
-
-                                        if (!Main.sponsorList.contains(p.getUniqueId()) && !Main.isAdmin(p))
-                                            Main.sponsorList.add(p.getUniqueId());
-                                    } else {
-                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_FULLED.getMessage());
-                                    }
-                                } else {
-                                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_BLOCKED.getMessage());
-                                }
+                                e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_LISNTER.getMessage());
                             }
-                        }
-                    } else {
-                        if (Main.isAdmin(p)) {
-                            e.allow();
-                        } else {
-                            e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_OTHER.getMessage());
                         }
                     }
                 }
@@ -146,15 +140,10 @@ public class JRListener implements Listener {
                 if (Main.isAdmin(p)) {
                     e.allow();
                 } else {
-                    if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName()) ||
-                            (!config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName()) && !blockList.contains(p.getUniqueId().toString()))) {
-                        if (throughList.contains(p.getUniqueId().toString())) {
-                            e.allow();
-                        } else {
-                            e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_FULLED.getMessage());
-                        }
+                    if (throughList.contains(p.getUniqueId().toString())) {
+                        e.allow();
                     } else {
-                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_BLOCKED.getMessage());
+                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_FULLED_ALL.getMessage());
                     }
                 }
             }
@@ -165,10 +154,38 @@ public class JRListener implements Listener {
                 if (throughList.contains(p.getUniqueId().toString())) {
                     e.allow();
                 } else {
-                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICKED_CLOSED.getMessage());
+                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_CLOSED.getMessage());
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+
+        if (!Main.isAdmin(p)) return;
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "アップデートを確認しています…");
+                p.sendMessage(Main.getSecondaryPrefix() + "アップデートを確認しています…");
+
+                boolean result = Main.isUpdateAvailable();
+                if (result) {
+                    Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "このバージョンは" + ChatColor.RED + "" + ChatColor.UNDERLINE + "最新版ではありません" + ChatColor.RESET + ChatColor.GRAY + "。\n" +
+                            Main.getSecondaryPrefix() + "更新をする必要があります。開発者から最新版を受け取り、入れ替えて再起動をしてください。");
+                    p.sendMessage(Main.getSecondaryPrefix() + "このバージョンは" + ChatColor.RED + "" + ChatColor.UNDERLINE + "最新版ではありません" + ChatColor.RESET + ChatColor.GRAY + "。\n" +
+                            Main.getSecondaryPrefix() + "更新をする必要があります。開発者から最新版を受け取り、入れ替えて再起動をしてください。");
+                } else  {
+                    Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "このバージョンは" + ChatColor.GREEN + "" + ChatColor.UNDERLINE + "最新版" + ChatColor.RESET + ChatColor.GRAY + "です。\n" +
+                            Main.getSecondaryPrefix() + "更新の必要はありません。");
+                    p.sendMessage(Main.getSecondaryPrefix() + "このバージョンは" + ChatColor.GREEN + "" + ChatColor.UNDERLINE + "最新版" + ChatColor.RESET + ChatColor.GRAY + "です。\n" +
+                            Main.getSecondaryPrefix() + "更新の必要はありません。");
+                }
+            }
+        }.runTaskLaterAsynchronously(Main.getInstance(), 100);
     }
 
     @EventHandler

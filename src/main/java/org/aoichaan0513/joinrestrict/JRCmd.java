@@ -1,5 +1,8 @@
 package org.aoichaan0513.joinrestrict;
 
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -9,8 +12,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.json.JSONArray;
 
+import javax.xml.soap.Text;
 import java.util.*;
 
 public class JRCmd implements CommandExecutor, TabCompleter {
@@ -109,12 +114,14 @@ public class JRCmd implements CommandExecutor, TabCompleter {
             if (Main.isAdmin(sender)) {
                 if (args.length == 1) {
                     if (args[0].length() == 0) {
-                        return Arrays.asList("status", "info", "open", "close", "count", "add", "remove", "allow", "deny", "save", "reset");
+                        return Arrays.asList("status", "info", "reload", "open", "close", "count", "add", "remove", "allow", "deny", "save", "reset");
                     } else {
                         if ("status".startsWith(args[0])) {
                             return Collections.singletonList("status");
                         } else if ("info".startsWith(args[0])) {
                             return Collections.singletonList("info");
+                        } else if ("reload".startsWith(args[0])) {
+                            return Collections.singletonList("reload");
                         } else if ("open".startsWith(args[0])) {
                             return Collections.singletonList("open");
                         } else if ("close".startsWith(args[0])) {
@@ -160,6 +167,8 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                         return Collections.singletonList("status");
                     } else if ("info".startsWith(args[0])) {
                         return Collections.singletonList("info");
+                    } else if ("reload".startsWith(args[0])) {
+                        return Collections.singletonList("reload");
                     } else if ("open".startsWith(args[0])) {
                         return Collections.singletonList("open");
                     } else if ("close".startsWith(args[0])) {
@@ -230,32 +239,95 @@ public class JRCmd implements CommandExecutor, TabCompleter {
             return;
         }
 
-
         int sponsorCount = JRListener.getPlayerCount(Main.sponsorList);
         int listenerCount = JRListener.getPlayerCount(Main.listenerList);
 
-        sender.sendMessage(Main.getSecondaryPrefix() + "サーバー情報\n" +
-                Main.getWarningPrefix() + "サーバー開放" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getBoolean(Main.ConfigType.ISENABLED_MAIN.getName()) ? "はい" : "いいえ") + "\n" +
-                Main.getWarningPrefix() + "連戦許可" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName()) ? "はい" : "いいえ") + "\n" +
-                Main.getWarningPrefix() + "全体の参加上限" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getInt(Main.ConfigType.MAXPLAYERS_ALL.getName()) != -1 ? config.getInt(Main.ConfigType.MAXPLAYERS_ALL.getName()) : Bukkit.getMaxPlayers()) + "人\n" +
-                Main.getWarningPrefix() + "スポンサーの参加上限" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1 ? sponsorCount + " / " : "") + (config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1 ? config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) + "人" : "無効") + "\n" +
-                Main.getWarningPrefix() + "リスナーの参加上限" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1 ? listenerCount + " / " : "") + (config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1 ? config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) + "人" : "無効") + "\n" +
-                Main.getWarningPrefix() + "スルーリスト" + ChatColor.GRAY + ": " + ChatColor.YELLOW + toString(config.getStringList(Main.ConfigType.LIST_THROUGH.getName()), true) + "\n" +
-                Main.getWarningPrefix() + "連戦リスト" + ChatColor.GRAY + ": " + ChatColor.YELLOW + toString(config.getStringList(Main.ConfigType.LIST_BLOCK.getName()), true));
-        return;
+        if (sender instanceof Player) {
+            TextComponent textComponent1 = new TextComponent(Main.getSecondaryPrefix() + "サーバー情報\n" +
+                    Main.getWarningPrefix() + "サーバー開放" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getBoolean(Main.ConfigType.ISENABLED_MAIN.getName()) ? "はい" : "いいえ") + "\n" +
+                    Main.getWarningPrefix() + "連戦許可" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName()) ? "はい" : "いいえ") + "\n" +
+                    Main.getWarningPrefix() + "全体の参加上限" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getInt(Main.ConfigType.MAXPLAYERS_ALL.getName()) != -1 ? config.getInt(Main.ConfigType.MAXPLAYERS_ALL.getName()) : Bukkit.getMaxPlayers()) + "人");
+
+            TextComponent textComponent2 = new TextComponent(ChatColor.GRAY + " (権限なし: " + Bukkit.getOnlinePlayers().stream().filter(player -> !Main.isAdmin(player)).count() + "人、権限あり: " + Bukkit.getOnlinePlayers().stream().filter(player -> Main.isAdmin(player)).count() + "人)\n");
+
+            StringBuffer stringBuffer1 = new StringBuffer();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (!Main.isAdmin(player)) continue;
+                stringBuffer1.append(ChatColor.YELLOW + player.getName() + ChatColor.GRAY + ", ");
+            }
+            String str1 = stringBuffer1.toString();
+
+            textComponent2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(str1.length() > 2 ? str1.substring(0, str1.length() - 2) : ChatColor.YELLOW + "なし").create()));
+
+            TextComponent textComponent3 = new TextComponent(Main.getWarningPrefix() + "スポンサーの参加上限" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1 ? config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) + "人" : "無効"));
+            TextComponent textComponent4 = new TextComponent((config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1 ? ChatColor.GRAY + " (" + sponsorCount + "人)" : "") + "\n");
+
+            StringBuffer stringBuffer2 = new StringBuffer();
+            for (UUID uuid : Main.sponsorList) {
+                Player player = Bukkit.getPlayer(uuid);
+                stringBuffer2.append(ChatColor.YELLOW + player.getName() + ChatColor.GRAY + ", ");
+            }
+            String str2 = stringBuffer2.toString();
+
+            textComponent4.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1 ? (str2.length() > 2 ? str2.substring(0, str2.length() - 2) : ChatColor.YELLOW + "なし") : ChatColor.YELLOW + "無効").create()));
+
+            textComponent3.addExtra(textComponent4);
+
+            TextComponent textComponent5 = new TextComponent(Main.getWarningPrefix() + "リスナーの参加上限" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1 ? config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) + "人" : "無効"));
+            TextComponent textComponent6 = new TextComponent((config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1 ? ChatColor.GRAY + " (" + listenerCount + "人)" : "") + "\n");
+
+            StringBuffer stringBuffer3 = new StringBuffer();
+            for (UUID uuid : Main.listenerList) {
+                Player player = Bukkit.getPlayer(uuid);
+                stringBuffer3.append(ChatColor.YELLOW + player.getName() + ChatColor.GRAY + ", ");
+            }
+            String str3 = stringBuffer3.toString();
+
+            textComponent6.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1 ? (str3.length() > 2 ? str3.substring(0, str3.length() - 2) : ChatColor.YELLOW + "なし") : ChatColor.YELLOW + "無効").create()));
+
+            textComponent5.addExtra(textComponent6);
+
+            TextComponent textComponent7 = new TextComponent(Main.getWarningPrefix() + "スルーリスト" + ChatColor.GRAY + ": " + ChatColor.YELLOW + toString(config.getStringList(Main.ConfigType.LIST_THROUGH.getName()), true) + "\n" +
+                    Main.getWarningPrefix() + "連戦リスト" + ChatColor.GRAY + ": " + ChatColor.YELLOW + toString(config.getStringList(Main.ConfigType.LIST_BLOCK.getName()), true));
+
+            textComponent1.addExtra(textComponent2);
+            textComponent1.addExtra(textComponent3);
+            textComponent1.addExtra(textComponent5);
+            textComponent1.addExtra(textComponent7);
+
+            ((Player) sender).spigot().sendMessage(textComponent1);
+            return;
+        } else {
+            sender.sendMessage(Main.getSecondaryPrefix() + "サーバー情報\n" +
+                    Main.getWarningPrefix() + "サーバー開放" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getBoolean(Main.ConfigType.ISENABLED_MAIN.getName()) ? "はい" : "いいえ") + "\n" +
+                    Main.getWarningPrefix() + "連戦許可" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName()) ? "はい" : "いいえ") + "\n" +
+                    Main.getWarningPrefix() + "全体の参加上限" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getInt(Main.ConfigType.MAXPLAYERS_ALL.getName()) != -1 ? config.getInt(Main.ConfigType.MAXPLAYERS_ALL.getName()) : Bukkit.getMaxPlayers()) + "人" + ChatColor.GRAY + " (権限なし: " + Bukkit.getOnlinePlayers().stream().filter(player -> !Main.isAdmin(player)).count() + "人、権限あり: " + Bukkit.getOnlinePlayers().stream().filter(player -> Main.isAdmin(player)).count() + "人)\n" +
+                    Main.getWarningPrefix() + "スポンサーの参加上限" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1 ? config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) + "人" : "無効") + (config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1 ? ChatColor.GRAY + " (" + sponsorCount + "人)" : "") + "\n" +
+                    Main.getWarningPrefix() + "リスナーの参加上限" + ChatColor.GRAY + ": " + ChatColor.YELLOW + (config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1 ? config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) + "人" : "無効") + (config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1 ? ChatColor.GRAY + " (" + listenerCount + "人)" : "") + "\n" +
+                    Main.getWarningPrefix() + "スルーリスト" + ChatColor.GRAY + ": " + ChatColor.YELLOW + toString(config.getStringList(Main.ConfigType.LIST_THROUGH.getName()), true) + "\n" +
+                    Main.getWarningPrefix() + "連戦リスト" + ChatColor.GRAY + ": " + ChatColor.YELLOW + toString(config.getStringList(Main.ConfigType.LIST_BLOCK.getName()), true));
+            return;
+        }
+
     }
 
     private void runReload(CommandSender sender, Command cmd, String label, String[] args) {
         sender.sendMessage(Main.getSecondaryPrefix() + "スポンサーデータを更新しています…");
-        Main.list.clear();
-        String result = Main.sendPost("https://yschecker.aoichaan0513.xyz/api", "{\"type\":\"getSponsors\"}");
-        System.out.println(result.substring(0, result.length() - 2) + "]");
-        JSONArray jsonArray = new JSONArray(result.substring(0, result.length() - 2) + "]");
-        for (Object object : jsonArray.toList()) {
-            Main.list.add(UUID.fromString(String.valueOf(object)));
-        }
-        sender.sendMessage(Main.getSecondaryPrefix() + "スポンサーデータを更新しました。\n" +
-                Main.getWarningPrefix() + "スポンサーの人数" + ChatColor.GRAY + ": " + Main.list.size() + "人");
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                List<UUID> list = Main.list;
+                Main.list.clear();
+
+                String result = Main.sendPost("https://yschecker.aoichaan0513.xyz/api", "{\"type\":\"getSponsors\"}");
+                JSONArray jsonArray = new JSONArray(result.substring(0, result.length() - 2) + "]");
+                for (Object object : jsonArray.toList()) {
+                    Main.list.add(UUID.fromString(String.valueOf(object)));
+                }
+                sender.sendMessage(Main.getSecondaryPrefix() + "スポンサーデータを更新しました。\n" +
+                        Main.getWarningPrefix() + "スポンサーの人数" + ChatColor.GRAY + ": " + ChatColor.YELLOW + Main.list.size() + "人" + ChatColor.GRAY + " (" + getDifferenceString(list.size(), Main.list.size()) + ")");
+            }
+        }.runTaskLaterAsynchronously(Main.getInstance(), 0);
         return;
     }
 
@@ -578,6 +650,24 @@ public class JRCmd implements CommandExecutor, TabCompleter {
 
     private String getCommandPrefix(CommandSender sender) {
         return sender instanceof Player ? "/" : "";
+    }
+
+    private String getDifferenceString(int a, int b) {
+        if (a > b)
+            return ChatColor.GRAY + "+" + (a - b);
+        else if (a < b)
+            return ChatColor.GRAY + "-" + (b - a);
+        else
+            return ChatColor.GRAY + "0";
+    }
+
+    private int getDifference(int a, int b) {
+        if (a > b)
+            return a - b;
+        else if (a < b)
+            return b - a;
+        else
+            return 0;
     }
 
     private String UUIDtoString(List<UUID> uuids) {
