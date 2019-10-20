@@ -143,7 +143,17 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                         }
                     }
                 } else if (args.length == 2) {
-                    if (args[0].equalsIgnoreCase("count")) {
+                    if (args[0].equalsIgnoreCase("close")) {
+                        if (args[1].length() == 0) {
+                            return Arrays.asList("true", "false");
+                        } else {
+                            if ("true".startsWith(args[0])) {
+                                return Collections.singletonList("true");
+                            } else if ("false".startsWith(args[0])) {
+                                return Collections.singletonList("false");
+                            }
+                        }
+                    } else if (args[0].equalsIgnoreCase("count")) {
                         if (args[1].length() == 0) {
                             return Arrays.asList("all", "sponsor", "listener");
                         } else {
@@ -153,6 +163,18 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                                 return Collections.singletonList("sponsor");
                             } else if ("listener".startsWith(args[0])) {
                                 return Collections.singletonList("listener");
+                            }
+                        }
+                    } else if (args[0].equalsIgnoreCase("save") || args[0].equalsIgnoreCase("reset")) {
+                        if (args[1].length() == 0) {
+                            return Arrays.asList("through", "block", "whitelist");
+                        } else {
+                            if ("through".startsWith(args[0])) {
+                                return Collections.singletonList("through");
+                            } else if ("block".startsWith(args[0])) {
+                                return Collections.singletonList("block");
+                            } else if ("whitelist".startsWith(args[0])) {
+                                return Collections.singletonList("whitelist");
                             }
                         }
                     }
@@ -190,7 +212,17 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                     }
                 }
             } else if (args.length == 2) {
-                if (args[0].equalsIgnoreCase("count")) {
+                if (args[0].equalsIgnoreCase("close")) {
+                    if (args[1].length() == 0) {
+                        return Arrays.asList("true", "false");
+                    } else {
+                        if ("true".startsWith(args[0])) {
+                            return Collections.singletonList("true");
+                        } else if ("false".startsWith(args[0])) {
+                            return Collections.singletonList("false");
+                        }
+                    }
+                } else if (args[0].equalsIgnoreCase("count")) {
                     if (args[1].length() == 0) {
                         return Arrays.asList("all", "sponsor", "listener");
                     } else {
@@ -200,6 +232,18 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                             return Collections.singletonList("sponsor");
                         } else if ("listener".startsWith(args[0])) {
                             return Collections.singletonList("listener");
+                        }
+                    }
+                } else if (args[0].equalsIgnoreCase("save") || args[0].equalsIgnoreCase("reset")) {
+                    if (args[1].length() == 0) {
+                        return Arrays.asList("through", "block", "whitelist");
+                    } else {
+                        if ("through".startsWith(args[0])) {
+                            return Collections.singletonList("through");
+                        } else if ("block".startsWith(args[0])) {
+                            return Collections.singletonList("block");
+                        } else if ("whitelist".startsWith(args[0])) {
+                            return Collections.singletonList("whitelist");
                         }
                     }
                 }
@@ -216,14 +260,14 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " status (info)" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "プラグイン情報を表示\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " reload" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "データを再取得\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " open" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "サーバーを開放\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " close" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "サーバーを閉鎖\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " close [true / false]" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "サーバーを閉鎖\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " count ..." + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "参加上限を変更\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " add <Name>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "プレイヤーをスルーリストに追加\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " remove <Name>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "プレイヤーをスルーリストから削除\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " allow" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦を許可\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " deny" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦を禁止\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " save" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストに追加\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " reset" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストをリセット");
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " save ..." + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストに追加\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " reset ..." + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストをリセット");
         return;
     }
 
@@ -357,9 +401,14 @@ public class JRCmd implements CommandExecutor, TabCompleter {
             config.set(configType.getName(), false);
             Main.saveJRConfig();
 
-            for (Player player : Bukkit.getOnlinePlayers())
-                if (!Main.isAdmin(player))
-                    player.kickPlayer(Main.ErrorType.CLOSED.getMessage());
+            if (args.length != 1) {
+                if (args[1].equalsIgnoreCase("false")) {
+                }
+            } else {
+                for (Player player : Bukkit.getOnlinePlayers())
+                    if (!Main.isAdmin(player))
+                        player.kickPlayer(Main.ErrorType.CLOSED.getMessage());
+            }
 
             sender.sendMessage(Main.getSecondaryPrefix() + "サーバーを" + ChatColor.RED + ChatColor.UNDERLINE + "閉鎖" + ChatColor.RESET + ChatColor.GRAY + "しました。");
             return;
@@ -371,7 +420,7 @@ public class JRCmd implements CommandExecutor, TabCompleter {
 
     private void runCount(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length != 1) {
-            if (args[1].equalsIgnoreCase("all")) {
+            if (args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("a")) {
                 final String typeName = "全体";
                 final Main.ConfigType configType = Main.ConfigType.MAXPLAYERS_ALL;
 
@@ -499,11 +548,12 @@ public class JRCmd implements CommandExecutor, TabCompleter {
         }
         sender.sendMessage(Main.getErrorPrefix() + Main.ErrorType.ARGS.getMessage() + "\n" +
                 Main.getErrorPrefix() + "使い方:\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " count all <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "全体が参加できる人数を設定\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " count sponsor <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ":\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " count s <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "スポンサーが参加できる人数を設定・機能を無効化\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " count listener <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ":\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " count l <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "リスナーが参加できる人数を設定・機能を無効化");
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " all <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ":\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " a <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "全体が参加できる人数を設定\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " sponsor <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ":\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " s <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "スポンサーが参加できる人数を設定・機能を無効化\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " listener <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ":\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " l <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "リスナーが参加できる人数を設定・機能を無効化");
         return;
     }
 
@@ -598,53 +648,119 @@ public class JRCmd implements CommandExecutor, TabCompleter {
     private void runSave(CommandSender sender, Command cmd, String label, String[] args) {
         FileConfiguration config = Main.getJRConfig();
 
-        final String typeName = "連戦";
-        final Main.ConfigType configType = Main.ConfigType.LIST_BLOCK;
+        if (args.length != 1) {
+            if (args[1].equalsIgnoreCase("through")) {
+                final String typeName = "スルー";
+                final Main.ConfigType configType = Main.ConfigType.LIST_THROUGH;
 
-        List<String> list = config.getStringList(configType.getName());
-        final boolean isOpen = config.getBoolean(Main.ConfigType.ISENABLED_MAIN.getName());
+                List<String> list = config.getStringList(configType.getName());
 
-        list.clear();
-        config.set(configType.getName(), list);
+                list.clear();
+                config.set(configType.getName(), list);
 
-        Date date = new Date();
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (Main.isAdmin(player)) continue;
+                    list.add(player.getUniqueId().toString());
+                }
 
-        Calendar en = Calendar.getInstance();
-        en.add(Calendar.MINUTE, -3);
-        Date end = en.getTime();
+                config.set(configType.getName(), list);
+                Main.saveJRConfig();
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (isOpen && !Main.isAdmin(player)) {
-                if (blockMap.containsKey(player.getUniqueId())) {
-                    Date d = new Date(blockMap.get(player.getUniqueId()));
+                sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストに" + list.size() + "人のプレイヤーを" + ChatColor.GOLD + ChatColor.UNDERLINE + "追加" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                return;
+            } else if (args[1].equalsIgnoreCase("block")) {
+                final String typeName = "連戦";
+                final Main.ConfigType configType = Main.ConfigType.LIST_BLOCK;
 
-                    if (end.compareTo(d) > 0) {
-                        list.add(player.getUniqueId().toString());
+                List<String> list = config.getStringList(configType.getName());
+                final boolean isOpen = config.getBoolean(Main.ConfigType.ISENABLED_MAIN.getName());
+
+                list.clear();
+                config.set(configType.getName(), list);
+
+                Calendar en = Calendar.getInstance();
+                en.add(Calendar.MINUTE, -3);
+                Date end = en.getTime();
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (isOpen && !Main.isAdmin(player)) {
+                        if (blockMap.containsKey(player.getUniqueId())) {
+                            Date d = new Date(blockMap.get(player.getUniqueId()));
+
+                            if (end.compareTo(d) > 0) {
+                                list.add(player.getUniqueId().toString());
+                            }
+                        }
                     }
                 }
+
+                config.set(configType.getName(), list);
+                Main.saveJRConfig();
+
+                sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストに" + list.size() + "人のプレイヤーを" + ChatColor.GOLD + ChatColor.UNDERLINE + "追加" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                return;
+            } else if (args[1].equalsIgnoreCase("whitelist")) {
+                final String typeName = "ホワイト";
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.setWhitelisted(true);
+                }
+
+                sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストに" + Bukkit.getOnlinePlayers().size() + "人のプレイヤーを" + ChatColor.GOLD + ChatColor.UNDERLINE + "追加" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                return;
             }
         }
-
-        config.set(configType.getName(), list);
-        Main.saveJRConfig();
-
-        sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストに" + list.size() + "人のプレイヤーを" + ChatColor.GOLD + ChatColor.UNDERLINE + "追加" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+        sender.sendMessage(Main.getErrorPrefix() + Main.ErrorType.ARGS.getMessage() + "\n" +
+                Main.getErrorPrefix() + "使い方:\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " block" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストにプレイヤーを追加\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " through" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "スルーリストにプレイヤーを追加\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " whitelist" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "ホワイトリストにプレイヤーを追加");
         return;
     }
 
     private void runReset(CommandSender sender, Command cmd, String label, String[] args) {
         FileConfiguration config = Main.getJRConfig();
 
-        final String typeName = "連戦";
-        final Main.ConfigType configType = Main.ConfigType.LIST_BLOCK;
+        if (args.length != 1) {
+            if (args[1].equalsIgnoreCase("through")) {
+                final String typeName = "スルー";
+                final Main.ConfigType configType = Main.ConfigType.LIST_THROUGH;
 
-        List<String> list = config.getStringList(configType.getName());
+                List<String> list = config.getStringList(configType.getName());
 
-        list.clear();
-        config.set(configType.getName(), list);
-        Main.saveJRConfig();
+                list.clear();
+                config.set(configType.getName(), list);
+                Main.saveJRConfig();
 
-        sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストを" + ChatColor.GOLD + ChatColor.UNDERLINE + "リセット" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストを" + ChatColor.GOLD + ChatColor.UNDERLINE + "リセット" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                return;
+            } else if (args[1].equalsIgnoreCase("block")) {
+                final String typeName = "連戦";
+                final Main.ConfigType configType = Main.ConfigType.LIST_BLOCK;
+
+                List<String> list = config.getStringList(configType.getName());
+
+                list.clear();
+                config.set(configType.getName(), list);
+                Main.saveJRConfig();
+
+                sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストを" + ChatColor.GOLD + ChatColor.UNDERLINE + "リセット" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                return;
+            } else if (args[1].equalsIgnoreCase("whitelist")) {
+                final String typeName = "ホワイト";
+
+                for (OfflinePlayer player : Bukkit.getWhitelistedPlayers()) {
+                    player.setWhitelisted(false);
+                }
+
+                sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストを" + ChatColor.GOLD + ChatColor.UNDERLINE + "リセット" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                return;
+            }
+        }
+        sender.sendMessage(Main.getErrorPrefix() + Main.ErrorType.ARGS.getMessage() + "\n" +
+                Main.getErrorPrefix() + "使い方:\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " block" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストをリセット\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " through" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "スルーリストをリセット\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " whitelist" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "ホワイトリストをリセット");
         return;
     }
 

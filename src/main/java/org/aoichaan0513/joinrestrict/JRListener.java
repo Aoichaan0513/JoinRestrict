@@ -46,10 +46,14 @@ public class JRListener implements Listener {
                     if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName())) {
                         e.allow();
                     } else {
-                        if (!blockList.contains(p.getUniqueId().toString())) {
+                        if (throughList.contains(p.getUniqueId().toString())) {
                             e.allow();
                         } else {
-                            e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
+                            if (!blockList.contains(p.getUniqueId().toString())) {
+                                e.allow();
+                            } else {
+                                e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
+                            }
                         }
                     }
                 } else {

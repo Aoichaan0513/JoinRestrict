@@ -32,8 +32,8 @@ public final class Main extends JavaPlugin {
     public static List<UUID> listenerList = new ArrayList<>();
 
     public static String pluginName;
-    public static final String pluginChannel = "Dev";
-    public static final String pluginVersion = "1.4.5";
+    public static String pluginChannel;
+    public static String pluginVersion;
 
     @Override
     public void onEnable() {
@@ -41,7 +41,10 @@ public final class Main extends JavaPlugin {
 
         saveDefaultConfig();
         fileConfiguration = getConfig();
+
         pluginName = getInstance().getDescription().getName();
+        pluginChannel = getDescription().getVersion().split("-")[0];
+        pluginVersion = getDescription().getVersion().split("-")[1];
 
         Bukkit.getConsoleSender().sendMessage(Main.getSuccessPrefix() + "プラグインを起動しました。");
 
@@ -162,7 +165,7 @@ public final class Main extends JavaPlugin {
             con.setRequestMethod("POST");
             con.setRequestProperty("Accept-Language", "jp");
             con.setRequestProperty("Content-Type", "application/JSON; charset=utf-8");
-            con.setRequestProperty("User-agent", "SponsorChecker_Plugin");
+            con.setRequestProperty("User-agent", "Aoichaan_Plugin");
             con.setRequestProperty("Content-Length", String.valueOf(json.length()));
             // リクエストのbodyにJSON文字列を書き込む
             OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
