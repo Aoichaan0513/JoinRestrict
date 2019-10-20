@@ -165,7 +165,7 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                                 return Collections.singletonList("listener");
                             }
                         }
-                    } else if (args[0].equalsIgnoreCase("save")) {
+                    } else if (args[0].equalsIgnoreCase("save") || args[0].equalsIgnoreCase("reset")) {
                         if (args[1].length() == 0) {
                             return Arrays.asList("through", "block", "whitelist");
                         } else {
@@ -234,7 +234,7 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                             return Collections.singletonList("listener");
                         }
                     }
-                } else if (args[0].equalsIgnoreCase("save")) {
+                } else if (args[0].equalsIgnoreCase("save") || args[0].equalsIgnoreCase("reset")) {
                     if (args[1].length() == 0) {
                         return Arrays.asList("through", "block", "whitelist");
                     } else {
@@ -266,8 +266,8 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " remove <Name>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "プレイヤーをスルーリストから削除\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " allow" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦を許可\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " deny" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦を禁止\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " save" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストに追加\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " reset" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストをリセット");
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " save ..." + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストに追加\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " reset ..." + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストをリセット");
         return;
     }
 
@@ -420,7 +420,7 @@ public class JRCmd implements CommandExecutor, TabCompleter {
 
     private void runCount(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length != 1) {
-            if (args[1].equalsIgnoreCase("all")) {
+            if (args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("a")) {
                 final String typeName = "全体";
                 final Main.ConfigType configType = Main.ConfigType.MAXPLAYERS_ALL;
 
@@ -548,7 +548,8 @@ public class JRCmd implements CommandExecutor, TabCompleter {
         }
         sender.sendMessage(Main.getErrorPrefix() + Main.ErrorType.ARGS.getMessage() + "\n" +
                 Main.getErrorPrefix() + "使い方:\n" +
-                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " all <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "全体が参加できる人数を設定\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " all <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ":\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " a <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "全体が参加できる人数を設定\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " sponsor <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ":\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " s <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "スポンサーが参加できる人数を設定・機能を無効化\n" +
                 Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " listener <Number / none>" + ChatColor.RESET + ChatColor.GRAY + ":\n" +
@@ -719,16 +720,47 @@ public class JRCmd implements CommandExecutor, TabCompleter {
     private void runReset(CommandSender sender, Command cmd, String label, String[] args) {
         FileConfiguration config = Main.getJRConfig();
 
-        final String typeName = "連戦";
-        final Main.ConfigType configType = Main.ConfigType.LIST_BLOCK;
+        if (args.length != 1) {
+            if (args[1].equalsIgnoreCase("through")) {
+                final String typeName = "スルー";
+                final Main.ConfigType configType = Main.ConfigType.LIST_THROUGH;
 
-        List<String> list = config.getStringList(configType.getName());
+                List<String> list = config.getStringList(configType.getName());
 
-        list.clear();
-        config.set(configType.getName(), list);
-        Main.saveJRConfig();
+                list.clear();
+                config.set(configType.getName(), list);
+                Main.saveJRConfig();
 
-        sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストを" + ChatColor.GOLD + ChatColor.UNDERLINE + "リセット" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストを" + ChatColor.GOLD + ChatColor.UNDERLINE + "リセット" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                return;
+            } else if (args[1].equalsIgnoreCase("block")) {
+                final String typeName = "連戦";
+                final Main.ConfigType configType = Main.ConfigType.LIST_BLOCK;
+
+                List<String> list = config.getStringList(configType.getName());
+
+                list.clear();
+                config.set(configType.getName(), list);
+                Main.saveJRConfig();
+
+                sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストを" + ChatColor.GOLD + ChatColor.UNDERLINE + "リセット" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                return;
+            } else if (args[1].equalsIgnoreCase("whitelist")) {
+                final String typeName = "ホワイト";
+
+                for (OfflinePlayer player : Bukkit.getWhitelistedPlayers()) {
+                    player.setWhitelisted(false);
+                }
+
+                sender.sendMessage(Main.getSuccessPrefix() + typeName + "リストを" + ChatColor.GOLD + ChatColor.UNDERLINE + "リセット" + ChatColor.RESET + ChatColor.GREEN + "しました。");
+                return;
+            }
+        }
+        sender.sendMessage(Main.getErrorPrefix() + Main.ErrorType.ARGS.getMessage() + "\n" +
+                Main.getErrorPrefix() + "使い方:\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " block" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "連戦リストをリセット\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " through" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "スルーリストをリセット\n" +
+                Main.getErrorPrefix() + ChatColor.YELLOW + ChatColor.UNDERLINE + getCommandPrefix(sender) + label + " " + args[0] + " whitelist" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GOLD + "ホワイトリストをリセット");
         return;
     }
 
