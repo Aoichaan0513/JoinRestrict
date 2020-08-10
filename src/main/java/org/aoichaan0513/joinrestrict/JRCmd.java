@@ -12,10 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.json.JSONArray;
 
-import javax.xml.soap.Text;
 import java.util.*;
 
 public class JRCmd implements CommandExecutor, TabCompleter {
@@ -357,6 +354,7 @@ public class JRCmd implements CommandExecutor, TabCompleter {
 
     private void runReload(CommandSender sender, Command cmd, String label, String[] args) {
         sender.sendMessage(Main.getSecondaryPrefix() + "スポンサーデータを更新しています…");
+        /*
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -372,6 +370,7 @@ public class JRCmd implements CommandExecutor, TabCompleter {
                         Main.getWarningPrefix() + "スポンサーの人数" + ChatColor.GRAY + ": " + ChatColor.YELLOW + Main.list.size() + "人" + ChatColor.GRAY + " (" + getDifferenceString(list.size(), Main.list.size()) + ")");
             }
         }.runTaskLaterAsynchronously(Main.getInstance(), 0);
+        */
         return;
     }
 

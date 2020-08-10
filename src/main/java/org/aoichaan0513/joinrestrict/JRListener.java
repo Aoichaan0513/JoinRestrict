@@ -7,10 +7,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Date;
 import java.util.List;
@@ -21,6 +19,9 @@ public class JRListener implements Listener {
     @EventHandler
     public void onLogin(PlayerLoginEvent e) {
         Player p = e.getPlayer();
+
+        if (p.isBanned())
+            e.disallow(PlayerLoginEvent.Result.KICK_BANNED, Main.ErrorType.KICK_OTHER.getMessage());
 
         Date date = new Date();
 
@@ -93,7 +94,11 @@ public class JRListener implements Listener {
                             if (Main.isAdmin(p)) {
                                 e.allow();
                             } else {
-                                e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_SPONSOR.getMessage());
+                                if (throughList.contains(p.getUniqueId().toString())) {
+                                    e.allow();
+                                } else {
+                                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_SPONSOR.getMessage());
+                                }
                             }
                         }
                     } else {
@@ -132,7 +137,11 @@ public class JRListener implements Listener {
                             if (Main.isAdmin(p)) {
                                 e.allow();
                             } else {
-                                e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_LISNTER.getMessage());
+                                if (throughList.contains(p.getUniqueId().toString())) {
+                                    e.allow();
+                                } else {
+                                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_SPONSOR.getMessage());
+                                }
                             }
                         }
                     }
@@ -164,6 +173,7 @@ public class JRListener implements Listener {
         }
     }
 
+    /*
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
@@ -191,15 +201,14 @@ public class JRListener implements Listener {
             }
         }.runTaskLaterAsynchronously(Main.getInstance(), 100);
     }
+    */
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
 
-        if (Main.sponsorList.contains(p.getUniqueId()))
-            Main.sponsorList.remove(p.getUniqueId());
-        if (Main.listenerList.contains(p.getUniqueId()))
-            Main.listenerList.remove(p.getUniqueId());
+        Main.sponsorList.remove(p.getUniqueId());
+        Main.listenerList.remove(p.getUniqueId());
     }
 
     @EventHandler

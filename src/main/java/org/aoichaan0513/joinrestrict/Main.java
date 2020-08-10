@@ -7,8 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -19,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.UUID;
 
 public final class Main extends JavaPlugin {
@@ -35,57 +34,9 @@ public final class Main extends JavaPlugin {
     public static String pluginChannel;
     public static String pluginVersion;
 
-    @Override
-    public void onEnable() {
-        javaPlugin = this;
-
-        saveDefaultConfig();
-        fileConfiguration = getConfig();
-
-        pluginName = getInstance().getDescription().getName();
-        pluginChannel = getDescription().getVersion().split("-")[0];
-        pluginVersion = getDescription().getVersion().split("-")[1];
-
-        Bukkit.getConsoleSender().sendMessage(Main.getSuccessPrefix() + "プラグインを起動しました。");
-
-        getCommand("jr").setExecutor(new JRCmd());
-        Bukkit.getPluginManager().registerEvents(new JRListener(), this);
-
-        Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "コマンド・リスナーを登録しました。");
-
-        FileConfiguration config = Main.getJRConfig();
-        config.set(ConfigType.ISENABLED_MAIN.getName(), false);
-        config.set(ConfigType.MAXPLAYERS_SPONSOR.getName(), -1);
-        config.set(ConfigType.MAXPLAYERS_LISTENER.getName(), -1);
-        Main.saveJRConfig();
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                String result = Main.sendPost("https://yschecker.aoichaan0513.xyz/api", "{\"type\":\"getSponsors\"}");
-                JSONArray jsonArray = new JSONArray(result.substring(0, result.length() - 2) + "]");
-                for (Object object : jsonArray.toList()) {
-                    list.add(UUID.fromString(String.valueOf(object)));
-                }
-                Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + ChatColor.UNDERLINE + Main.list.size() + "人" + ChatColor.RESET + ChatColor.GRAY + "をスポンサーとして登録しました。");
-            }
-        }.runTaskLaterAsynchronously(Main.getInstance(), 0);
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "アップデートを確認しています…");
-
-                boolean result = isUpdateAvailable();
-                if (result) {
-                    Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "このバージョンは" + ChatColor.RED + "" + ChatColor.UNDERLINE + "最新版ではありません" + ChatColor.RESET + ChatColor.GRAY + "。\n" +
-                            Main.getSecondaryPrefix() + "更新をする必要があります。開発者から最新版を受け取り、入れ替えて再起動をしてください。");
-                } else  {
-                    Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "このバージョンは" + ChatColor.GREEN + "" + ChatColor.UNDERLINE + "最新版" + ChatColor.RESET + ChatColor.GRAY + "です。\n" +
-                            Main.getSecondaryPrefix() + "更新の必要はありません。");
-                }
-            }
-        }.runTaskLaterAsynchronously(Main.getInstance(), 100);
+    public static boolean isUpdateAvailable() {
+        JSONObject jsonObject = new JSONObject(Main.sendPost("https://jrapi.aoichaan0513.jp/api", "{\"type\":\"getVersion\",\"name\":\"" + pluginName + "\",\"channel\":\"" + pluginChannel + "\",\"version\":\"" + pluginVersion + "\"}"));
+        return jsonObject.getBoolean("return") && jsonObject.getString("result").equalsIgnoreCase("Update required.");
     }
 
     @Override
@@ -203,18 +154,59 @@ public final class Main extends JavaPlugin {
         return result.toString();
     }
 
-    public static boolean isUpdateAvailable() {
-        JSONObject jsonObject = new JSONObject(Main.sendPost("http://api.aoichaan0513.xyz/api", "{\"type\":\"getVersion\",\"name\":\"" + pluginName + "\",\"channel\":\"" + pluginChannel + "\",\"version\":\"" + pluginVersion + "\"}"));
+    @Override
+    public void onEnable() {
+        javaPlugin = this;
 
-        if (jsonObject.getBoolean("return")) {
-            if (jsonObject.getString("result").equalsIgnoreCase("Update required.")) {
-                return true;
-            } else {
-                return false;
+        saveDefaultConfig();
+        fileConfiguration = getConfig();
+
+        pluginName = getInstance().getDescription().getName();
+        pluginChannel = ResourceBundle.getBundle("settings").getString("projectChannel");
+        pluginVersion = ResourceBundle.getBundle("settings").getString("projectVersion");
+
+        Bukkit.getConsoleSender().sendMessage(Main.getSuccessPrefix() + "プラグインを起動しました。");
+
+        getCommand("jr").setExecutor(new JRCmd());
+        Bukkit.getPluginManager().registerEvents(new JRListener(), this);
+
+        Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "コマンド・リスナーを登録しました。");
+
+        FileConfiguration config = Main.getJRConfig();
+        config.set(ConfigType.ISENABLED_MAIN.getName(), false);
+        config.set(ConfigType.MAXPLAYERS_SPONSOR.getName(), -1);
+        config.set(ConfigType.MAXPLAYERS_LISTENER.getName(), -1);
+        Main.saveJRConfig();
+
+        /*
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                String result = Main.sendPost("https://yschecker.aoichaan0513.xyz/api", "{\"type\":\"getSponsors\"}");
+                JSONArray jsonArray = new JSONArray(result.substring(0, result.length() - 2) + "]");
+                for (Object object : jsonArray.toList()) {
+                    list.add(UUID.fromString(String.valueOf(object)));
+                }
+                Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + ChatColor.UNDERLINE + Main.list.size() + "人" + ChatColor.RESET + ChatColor.GRAY + "をスポンサーとして登録しました。");
             }
-        } else {
-            return false;
-        }
+        }.runTaskAsynchronously(Main.getInstance());
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "アップデートを確認しています…");
+
+                boolean result = isUpdateAvailable();
+                if (result) {
+                    Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "このバージョンは" + ChatColor.RED + "" + ChatColor.UNDERLINE + "最新版ではありません" + ChatColor.RESET + ChatColor.GRAY + "。\n" +
+                            Main.getSecondaryPrefix() + "更新をする必要があります。開発者から最新版を受け取り、入れ替えて再起動をしてください。");
+                } else  {
+                    Bukkit.getConsoleSender().sendMessage(Main.getSecondaryPrefix() + "このバージョンは" + ChatColor.GREEN + "" + ChatColor.UNDERLINE + "最新版" + ChatColor.RESET + ChatColor.GRAY + "です。\n" +
+                            Main.getSecondaryPrefix() + "更新の必要はありません。");
+                }
+            }
+        }.runTaskLaterAsynchronously(Main.getInstance(), 100);
+        */
     }
 
     public enum ConfigType {
@@ -228,7 +220,7 @@ public final class Main extends JavaPlugin {
 
         private final String name;
 
-        private ConfigType(String name) {
+        ConfigType(String name) {
             this.name = name;
         }
 
@@ -254,7 +246,7 @@ public final class Main extends JavaPlugin {
 
         private final String msg;
 
-        private ErrorType(String msg) {
+        ErrorType(String msg) {
             this.msg = msg;
         }
 

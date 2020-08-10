@@ -3,8 +3,12 @@ plugins {
     id 'java'
 }
 
-group = pluginGroup
-version = pluginVersion
+def projectChannel = 'Dev'
+def projectVersion = '1.5.0'
+def projectBuildDate = new Date().format('yy.MMdd.HHmm')
+
+group = 'jp.aoichaan0513'
+version = "$projectChannel-${projectVersion}_$projectBuildDate"
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
@@ -31,7 +35,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
     from(sourceSets.main.resources.srcDirs) {
-        filter ReplaceTokens, tokens: [version: version]
+        filter ReplaceTokens, tokens: ['version': new String("$projectChannel-$projectVersion"), 'projectChannel': projectChannel, 'projectVersion': projectVersion, 'projectBuildDate': projectBuildDate]
     }
 }
 
