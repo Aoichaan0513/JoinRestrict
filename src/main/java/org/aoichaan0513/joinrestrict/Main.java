@@ -241,7 +241,7 @@ public final class Main extends JavaPlugin {
         KICK_FULLED_LISTENER(ChatColor.RED + "現在リスナーの枠が満員のため参加することが出来ません。"),
         KICK_BLOCKED(ChatColor.RED + "あなたは前回参加したため参加することが出来ません。"),
         KICK_SPONSOR(ChatColor.RED + "現在スポンサーは参加することが出来ません。"),
-        KICK_LISNTER(ChatColor.RED + "現在リスナーは参加することが出来ません。"),
+        KICK_LISTENER(ChatColor.RED + "現在リスナーは参加することが出来ません。"),
         KICK_OTHER(ChatColor.RED + "現在参加することが出来ません。");
 
         private final String msg;

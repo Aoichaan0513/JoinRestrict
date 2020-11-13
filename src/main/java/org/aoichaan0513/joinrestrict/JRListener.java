@@ -1,5 +1,6 @@
 package org.aoichaan0513.joinrestrict;
 
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,7 +21,8 @@ public class JRListener implements Listener {
     public void onLogin(PlayerLoginEvent e) {
         Player p = e.getPlayer();
 
-        if (p.isBanned())
+        if (Bukkit.getBanList(BanList.Type.NAME).isBanned(p.getName()) || Bukkit.getBanList(BanList.Type.IP).isBanned(p.getAddress().getHostName())
+                || p.isBanned())
             e.disallow(PlayerLoginEvent.Result.KICK_BANNED, Main.ErrorType.KICK_OTHER.getMessage());
 
         Date date = new Date();
