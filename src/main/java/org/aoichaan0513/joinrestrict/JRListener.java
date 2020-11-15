@@ -2,12 +2,13 @@ package org.aoichaan0513.joinrestrict;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.Date;
@@ -17,14 +18,15 @@ import java.util.UUID;
 public class JRListener implements Listener {
 
     @EventHandler
-    public void onLogin(PlayerLoginEvent e) {
-        Player p = e.getPlayer();
+    public void onLogin(AsyncPlayerPreLoginEvent e) {
+        UUID uuid = e.getUniqueId();
+        OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
 
-        if (e.getResult() == PlayerLoginEvent.Result.KICK_BANNED) return;
+        if (e.getLoginResult() == AsyncPlayerPreLoginEvent.Result.KICK_BANNED) return;
 
         Date date = new Date();
 
-        JRCmd.blockMap.put(p.getUniqueId(), date.getTime());
+        JRCmd.blockMap.put(uuid, date.getTime());
 
         FileConfiguration config = Main.getJRConfig(false);
 
@@ -46,46 +48,44 @@ public class JRListener implements Listener {
                     if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName())) {
                         e.allow();
                     } else {
-                        if (throughList.contains(p.getUniqueId().toString())) {
+                        if (throughList.contains(uuid.toString())) {
                             e.allow();
                         } else {
-                            if (!blockList.contains(p.getUniqueId().toString())) {
+                            if (!blockList.contains(uuid.toString())) {
                                 e.allow();
                             } else {
-                                e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
+                                e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
                             }
                         }
                     }
                 } else {
-                    if (Main.list.contains(p.getUniqueId())) {
-                        /**
-                         * スポンサー時の処理
-                         */
+                    if (Main.list.contains(uuid)) {
+                        // スポンサー時の処理
                         if (config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName()) != -1) {
                             if (sponsorCount < config.getInt(Main.ConfigType.MAXPLAYERS_SPONSOR.getName())) {
                                 if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName())) {
                                     e.allow();
 
-                                    if (!Main.sponsorList.contains(p.getUniqueId()) && !Main.isAdmin(p))
-                                        Main.sponsorList.add(p.getUniqueId());
+                                    if (!Main.sponsorList.contains(uuid) && !Main.isAdmin(p))
+                                        Main.sponsorList.add(uuid);
                                 } else {
-                                    if (!blockList.contains(p.getUniqueId().toString())) {
+                                    if (!blockList.contains(uuid.toString())) {
                                         e.allow();
 
-                                        if (!Main.sponsorList.contains(p.getUniqueId()) && !Main.isAdmin(p))
-                                            Main.sponsorList.add(p.getUniqueId());
+                                        if (!Main.sponsorList.contains(uuid) && !Main.isAdmin(p))
+                                            Main.sponsorList.add(uuid);
                                     } else {
-                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
+                                        e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
                                     }
                                 }
                             } else {
                                 if (Main.isAdmin(p)) {
                                     e.allow();
                                 } else {
-                                    if (throughList.contains(p.getUniqueId().toString())) {
+                                    if (throughList.contains(uuid.toString())) {
                                         e.allow();
                                     } else {
-                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_FULLED_SPONSOR.getMessage());
+                                        e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_FULLED_SPONSOR.getMessage());
                                     }
                                 }
                             }
@@ -93,42 +93,40 @@ public class JRListener implements Listener {
                             if (Main.isAdmin(p)) {
                                 e.allow();
                             } else {
-                                if (throughList.contains(p.getUniqueId().toString())) {
+                                if (throughList.contains(uuid.toString())) {
                                     e.allow();
                                 } else {
-                                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_SPONSOR.getMessage());
+                                    e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_SPONSOR.getMessage());
                                 }
                             }
                         }
                     } else {
-                        /**
-                         * 通常時の処理
-                         */
+                        // 通常時の処理
                         if (config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName()) != -1) {
                             if (listenerCount < config.getInt(Main.ConfigType.MAXPLAYERS_LISTENER.getName())) {
                                 if (config.getBoolean(Main.ConfigType.ISENABLED_BLOCK.getName())) {
                                     e.allow();
 
-                                    if (!Main.listenerList.contains(p.getUniqueId()) && !Main.isAdmin(p))
-                                        Main.listenerList.add(p.getUniqueId());
+                                    if (!Main.listenerList.contains(uuid) && !Main.isAdmin(p))
+                                        Main.listenerList.add(uuid);
                                 } else {
-                                    if (!blockList.contains(p.getUniqueId().toString())) {
+                                    if (!blockList.contains(uuid.toString())) {
                                         e.allow();
 
-                                        if (!Main.listenerList.contains(p.getUniqueId()) && !Main.isAdmin(p))
-                                            Main.listenerList.add(p.getUniqueId());
+                                        if (!Main.listenerList.contains(uuid) && !Main.isAdmin(p))
+                                            Main.listenerList.add(uuid);
                                     } else {
-                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
+                                        e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_BLOCKED.getMessage());
                                     }
                                 }
                             } else {
                                 if (Main.isAdmin(p)) {
                                     e.allow();
                                 } else {
-                                    if (throughList.contains(p.getUniqueId().toString())) {
+                                    if (throughList.contains(uuid.toString())) {
                                         e.allow();
                                     } else {
-                                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_FULLED_LISTENER.getMessage());
+                                        e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_FULLED_LISTENER.getMessage());
                                     }
                                 }
                             }
@@ -136,26 +134,24 @@ public class JRListener implements Listener {
                             if (Main.isAdmin(p)) {
                                 e.allow();
                             } else {
-                                if (throughList.contains(p.getUniqueId().toString())) {
+                                if (throughList.contains(uuid.toString())) {
                                     e.allow();
                                 } else {
-                                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_SPONSOR.getMessage());
+                                    e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_SPONSOR.getMessage());
                                 }
                             }
                         }
                     }
                 }
             } else {
-                /**
-                 * 全体的の上限に引っかかったときの処理
-                 */
+                // 全体の上限に引っかかったときの処理
                 if (Main.isAdmin(p)) {
                     e.allow();
                 } else {
-                    if (throughList.contains(p.getUniqueId().toString())) {
+                    if (throughList.contains(uuid.toString())) {
                         e.allow();
                     } else {
-                        e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_FULLED_ALL.getMessage());
+                        e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_FULLED_ALL.getMessage());
                     }
                 }
             }
@@ -163,10 +159,10 @@ public class JRListener implements Listener {
             if (Main.isAdmin(p)) {
                 e.allow();
             } else {
-                if (throughList.contains(p.getUniqueId().toString())) {
+                if (throughList.contains(uuid.toString())) {
                     e.allow();
                 } else {
-                    e.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_CLOSED.getMessage());
+                    e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, Main.ErrorType.KICK_CLOSED.getMessage());
                 }
             }
         }
